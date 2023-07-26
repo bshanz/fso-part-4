@@ -1,4 +1,6 @@
 const blog = require("../models/blog")
+const _ = require('lodash')
+
 
 const dummy = (blogs) => {
     return 1
@@ -40,11 +42,40 @@ const favoriteBlog = (blogs) => {
     })
 
 return mostLikedBlog;
-
 }
+
+const mostBlogs = (blogs) => {
+    // Count the occurrence of each author in the array of blogs
+    const authors = _.countBy(blogs, 'author')
+  
+    // Find the author with the most blogs
+    const maxAuthor = _.maxBy(_.keys(authors), (author) => authors[author])
+  
+    // Return the result
+    return {
+      author: maxAuthor,
+      blogs: authors[maxAuthor],
+    }
+  }
+
+  const mostLikes = (blogs) => {
+      const authors = _.groupBy(blogs, 'author');
+  
+      const authorsWithLikes = _.map(authors, (blogs, author) => {
+          return {
+              author: author,
+              likes: _.reduce(blogs, (sum, blog) => sum + blog.likes, 0)
+          };
+      });
+  
+      return _.maxBy(authorsWithLikes, 'likes');
+  };
+  
 
 module.exports = {
     dummy,
     totalLikes,
-    favoriteBlog
+    favoriteBlog,
+    mostBlogs,
+    mostLikes
   }
