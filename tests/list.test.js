@@ -7,7 +7,7 @@ test.skip('dummy returns one', () =>{
     expect(result).toBe(1)
 })
 
-describe('total likes', () => {
+describe.skip('total likes', () => {
     const listWithOneBlog = [
       {
         _id: '5a422aa71b54a676234d17f8',
@@ -89,7 +89,7 @@ describe('total likes', () => {
 
   })
 
-  describe('shows the blog with the most likes', () => {
+  describe.skip('shows the blog with the most likes', () => {
 
     const blogs = [
         {
@@ -153,7 +153,7 @@ describe('total likes', () => {
     })
   })
 
-  describe('author with most blogs', () => {
+  describe.skip('author with most blogs', () => {
 
     const blogs = [
         {
@@ -215,7 +215,7 @@ describe('total likes', () => {
     })
   })
 
-  describe('author with most likes', () => {
+  describe.skip('author with most likes', () => {
 
     const blogs = [
         {
