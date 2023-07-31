@@ -74,7 +74,7 @@ test('Blog created successfully', async () => {
     // you can add other assertions here
 })
 
-test.only('If likes are missing make it 0', async () => {
+test('If likes are missing make it 0', async () => {
     const newBlog = {
         title: "New Blog 24",
         author: "JK Rowling 24",
@@ -90,24 +90,16 @@ test.only('If likes are missing make it 0', async () => {
         expect(response.body.likes).toBe(0)
 })
 
-// test('Blog without required content is not added', async () => {
-//     // You may replace 'title' with 'author', 'url', or 'likes' to test other fields
-//     const newBlog = {
-//         author: "JK Rowling",
-//         url: "http://google.com",
-//         likes: 100
-//     }
+test.only('If title or author is missing send 400', async () => {
+    const newBlog = {
+        url: "http://google.com/24",
+    }
 
-//     await api
-//         .post('/api/blogs')
-//         .send(newBlog)
-//         .expect(400)
-
-//     const response = await api.get('/api/blogs')
-
-//     // replace initialNotes with initialBlogs (or whatever the initial blog list is called)
-//     expect(response.body).toHaveLength(2)
-// })
+    const response = await api
+        .post('/api/blogs')
+        .send(newBlog)  // use .send() to include newBlog in the body of the request
+        .expect(400)
+})
 
 test('Blog has an ID', async () =>{
     const response = await api.get('/api/blogs')
