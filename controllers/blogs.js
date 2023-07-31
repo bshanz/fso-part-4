@@ -14,13 +14,17 @@ blogsRouter.get('/', async (request, response) => {
   blogsRouter.post('/', async (request, response) => {
     const blog = new Blog(request.body)
 
+    console.log("REQUEST BODYYYYYY", request.body)
+
     try {
         const savedBlog = await blog.save()
         response.status(201).json(savedBlog)
     } catch (error) {
+        console.log(error)
         response.status(400).send(error)
     }
 })
+
 
 
 module.exports = blogsRouter

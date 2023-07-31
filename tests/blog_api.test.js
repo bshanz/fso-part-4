@@ -57,21 +57,22 @@ test('First blog title is "Blog Title', async () =>{
     expect(response.body[0].title).toBe("Blog Title")
 })
 
-// test('Blog created successfully', async () => {
-//     const newBlog = {
-//         title: "New Blog",
-//         author: "JK Rowling",
-//         url: "http://google.com",
-//         likes: 100
-//     }
+test.only('Blog created successfully', async () => {
+    const newBlog = {
+        title: "New Blog",
+        author: "JK Rowling",
+        url: "http://google.com",
+        likes: 100
+    }
 
-//     const response = await api.post('/api/blogs', newBlog)
-
-//     expect(response.status).toBe(201)
-//     expect(response.body.id).toBeDefined() // new
-//     const { id, ...blogWithoutId } = response.body;
-//     expect(blogWithoutId).toMatchObject(newBlog)
-// })
+    const response = await api
+        .post('/api/blogs')
+        .send(newBlog)  // use .send() to include newBlog in the body of the request
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
+    
+    // you can add other assertions here
+})
 
 // test('Blog without required content is not added', async () => {
 //     // You may replace 'title' with 'author', 'url', or 'likes' to test other fields
