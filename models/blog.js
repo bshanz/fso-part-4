@@ -30,9 +30,11 @@ mongoose.connect(url)
     },
     likes: {
         type: Number,
-        required: true
+        required: true,
+        default: 0  // default value if `likes` is missing
     }
 });
+
 
 
   blogSchema.set('toJSON', {

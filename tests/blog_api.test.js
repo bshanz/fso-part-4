@@ -57,7 +57,7 @@ test('First blog title is "Blog Title', async () =>{
     expect(response.body[0].title).toBe("Blog Title")
 })
 
-test.only('Blog created successfully', async () => {
+test('Blog created successfully', async () => {
     const newBlog = {
         title: "New Blog",
         author: "JK Rowling",
@@ -72,6 +72,22 @@ test.only('Blog created successfully', async () => {
         .expect('Content-Type', /application\/json/)
     
     // you can add other assertions here
+})
+
+test.only('If likes are missing make it 0', async () => {
+    const newBlog = {
+        title: "New Blog 24",
+        author: "JK Rowling 24",
+        url: "http://google.com/24",
+    }
+
+    const response = await api
+        .post('/api/blogs')
+        .send(newBlog)  // use .send() to include newBlog in the body of the request
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
+    
+        expect(response.body.likes).toBe(0)
 })
 
 // test('Blog without required content is not added', async () => {
