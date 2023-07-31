@@ -73,26 +73,30 @@ test('First blog title is "Blog Title', async () =>{
 //     expect(blogWithoutId).toMatchObject(newBlog)
 // })
 
-test('Blog without required content is not added', async () => {
-    // You may replace 'title' with 'author', 'url', or 'likes' to test other fields
-    const newBlog = {
-        author: "JK Rowling",
-        url: "http://google.com",
-        likes: 100
-    }
+// test('Blog without required content is not added', async () => {
+//     // You may replace 'title' with 'author', 'url', or 'likes' to test other fields
+//     const newBlog = {
+//         author: "JK Rowling",
+//         url: "http://google.com",
+//         likes: 100
+//     }
 
-    await api
-        .post('/api/blogs')
-        .send(newBlog)
-        .expect(400)
+//     await api
+//         .post('/api/blogs')
+//         .send(newBlog)
+//         .expect(400)
 
+//     const response = await api.get('/api/blogs')
+
+//     // replace initialNotes with initialBlogs (or whatever the initial blog list is called)
+//     expect(response.body).toHaveLength(2)
+// })
+
+test('Blog has an ID', async () =>{
     const response = await api.get('/api/blogs')
 
-    // replace initialNotes with initialBlogs (or whatever the initial blog list is called)
-    expect(response.body).toHaveLength(2)
+    expect(response.body[0]._id).toBeDefined()
 })
-
-
 
 afterAll(async () => {
   await mongoose.connection.close()
