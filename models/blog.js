@@ -16,15 +16,31 @@ mongoose.connect(url)
   })
 
   const blogSchema = new mongoose.Schema({
-    title: String,
-    author: String,
-    content: String,
-  })
+    title: {
+        type: String,
+        required: true
+    },
+    author: {
+        type: String,
+        required: true
+    },
+    url: {
+        type: String,
+        required: true
+    },
+    likes: {
+        type: Number,
+        required: true,
+        default: 0  // default value if `likes` is missing
+    }
+});
+
+
 
   blogSchema.set('toJSON', {
     transform: (document, returnedObject) => {
       returnedObject.id = returnedObject._id.toString()
-      delete returnedObject._id
+      //delete returnedObject._id
       delete returnedObject.__v
     }
   });
