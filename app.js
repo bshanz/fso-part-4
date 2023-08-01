@@ -7,7 +7,7 @@ const middleware = require('./utils/middleware')
 const logger = require('./utils/logger')
 const mongoose = require('mongoose')
 
-const Blog = require('./models/blog') // import the Blog model
+//const Blog = require('./models/blog') // import the Blog model
 
 mongoose.set('strictQuery', false)
 

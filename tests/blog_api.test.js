@@ -20,93 +20,109 @@ const initialBlogs = [
         url: "http://example.com/blog2",
         likes: 20
     },
-    // add more blogs as needed
 ]
 
+// Create the blogs in order of initial blogs.
 beforeEach(async () => {
-    // delete all existing blogs
     await Blog.deleteMany({})
 
-    // add initial blogs
-    // Note: we're using Promise.all to ensure that all blogs have been saved
-    // before we proceed with the tests. Promise.all takes an array of promises
-    // and returns a new promise that only resolves when all the input promises have resolved.
-    const blogObjects = initialBlogs.map(blog => new Blog(blog))
-    const promiseArray = blogObjects.map(blog => blog.save())
-    await Promise.all(promiseArray)
-})
-
-// test cases go here
-
-test('blogs are returned as json', async () => {
-  await api
-    .get('/api/blogs')
-    .expect(200)
-    .expect('Content-Type', /application\/json/)
-}, 100000)
-
-test('there are two blogs', async () => {
-    const response = await api.get('/api/blogs')
-  
-    expect(response.body).toHaveLength(2)
-  })
-
-test('First blog title is "Blog Title', async () =>{
-    const response = await api.get('/api/blogs')
-
-    expect(response.body[0].title).toBe("Blog Title")
-})
-
-test('Blog created successfully', async () => {
-    const newBlog = {
-        title: "New Blog",
-        author: "JK Rowling",
-        url: "http://google.com",
-        likes: 100
+    for (let blog of initialBlogs) {
+        let blogObject = new Blog(blog)
+        await blogObject.save()
     }
-
-    const response = await api
-        .post('/api/blogs')
-        .send(newBlog)  // use .send() to include newBlog in the body of the request
-        .expect(201)
-        .expect('Content-Type', /application\/json/)
-    
-    // you can add other assertions here
 })
 
-test('If likes are missing make it 0', async () => {
-    const newBlog = {
-        title: "New Blog 24",
-        author: "JK Rowling 24",
-        url: "http://google.com/24",
-    }
+// Test cases below.
+describe('when there is initially some blogs saved', () => {
+    test('blogs are returned as json', async () => {
+        await api
+            .get('/api/blogs')
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
+    })
 
-    const response = await api
-        .post('/api/blogs')
-        .send(newBlog)  // use .send() to include newBlog in the body of the request
-        .expect(201)
-        .expect('Content-Type', /application\/json/)
+    test('there are two blogs', async () => {
+        const response = await api.get('/api/blogs')
+        expect(response.body).toHaveLength(2)
+    })
+
+    test('First blog title is "Blog Title', async () => {
+        const response = await api.get('/api/blogs')
+        expect(response.body[0].title).toBe("Blog Title")
+    })
+
+    test('Blog has an ID', async () => {
+        const response = await api.get('/api/blogs')
+        expect(response.body[0]._id).toBeDefined()
+    })
+
+    test('Getting a single blog by ID', async () => {
+        const blogsAtStart = await api.get('/api/blogs')
+        const blogToView = blogsAtStart.body[0]
+
+        const resultBlog = await api
+            .get(`/api/blogs/${blogToView.id}`)
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
+
+        expect(resultBlog.body).toEqual(blogToView)
+    })
+
+    test('a blog can be deleted', async () => {
+        let blogsAtStart = await api.get('/api/blogs');
+        const blogToDelete = blogsAtStart.body[0];
+        await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204);
+        const blogsAtEnd = await api.get('/api/blogs');
+        expect(blogsAtEnd.body).toHaveLength(blogsAtStart.body.length - 1);
+        const titles = blogsAtEnd.body.map(b => b.title);
+        expect(titles).not.toContain(blogToDelete.title);
+    })
+})
+
+describe('addition of a new blog', () => {
+    test('Blog created successfully', async () => {
+        const newBlog = {
+            title: "New Blog",
+            author: "JK Rowling",
+            url: "http://google.com",
+            likes: 100
+        }
+
+        await api
+            .post('/api/blogs')
+            .send(newBlog)
+            .expect(201)
+            .expect('Content-Type', /application\/json/)
+    })
+
+    test('If likes are missing make it 0', async () => {
+        const newBlog = {
+            title: "New Blog 24",
+            author: "JK Rowling 24",
+            url: "http://google.com/24",
+        }
+
+        const response = await api
+            .post('/api/blogs')
+            .send(newBlog)
+            .expect(201)
+            .expect('Content-Type', /application\/json/)
     
         expect(response.body.likes).toBe(0)
-})
+    })
 
-test.only('If title or author is missing send 400', async () => {
-    const newBlog = {
-        url: "http://google.com/24",
-    }
+    test('If title or author is missing send 400', async () => {
+        const newBlog = {
+            url: "http://google.com/24",
+        }
 
-    const response = await api
-        .post('/api/blogs')
-        .send(newBlog)  // use .send() to include newBlog in the body of the request
-        .expect(400)
-})
-
-test('Blog has an ID', async () =>{
-    const response = await api.get('/api/blogs')
-
-    expect(response.body[0]._id).toBeDefined()
+        await api
+            .post('/api/blogs')
+            .send(newBlog)
+            .expect(400)
+    })
 })
 
 afterAll(async () => {
-  await mongoose.connection.close()
+    await mongoose.connection.close()
 })
