@@ -9,10 +9,10 @@ blogsRouter.get('/', async (request, response) => {
     } catch (error) {
         console.log(error)
     }
-    
-  })
 
-  blogsRouter.post('/', async (request, response) => {
+})
+
+blogsRouter.post('/', async (request, response) => {
     const blog = new Blog(request.body)
 
     try {
@@ -49,9 +49,5 @@ blogsRouter.delete('/:id', async (request, response) => {
         response.status(500).send({ error: 'something went wrong...' });
     }
 })
-
-
-
-
 
 module.exports = blogsRouter
