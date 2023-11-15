@@ -2,6 +2,9 @@ const blogsRouter = require('express').Router()
 const { response } = require('../app')
 const Blog = require('../models/blog')
 
+// Next step: see ChatGPT and update this and the Blog model to include 
+// user information when a blog is created or displayed
+
 blogsRouter.get('/', async (request, response) => {
     try {
         const blogs = await Blog.find({})
