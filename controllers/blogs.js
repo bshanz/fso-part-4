@@ -1,6 +1,10 @@
 const blogsRouter = require('express').Router()
 const { response } = require('../app')
 const Blog = require('../models/blog')
+const User = require('../models/user')
+
+// Next step: see ChatGPT and update this and the Blog model to include 
+// user information when a blog is created or displayed
 
 blogsRouter.get('/', async (request, response) => {
     try {
@@ -12,17 +16,47 @@ blogsRouter.get('/', async (request, response) => {
 
 })
 
+// blogsRouter.post('/', async (request, response) => {
+//     const blog = new Blog(request.body)
+
+//     try {
+//         const savedBlog = await blog.save()
+//         response.status(201).json(savedBlog)
+//     } catch (error) {
+//         console.log(error)
+//         response.status(400).send(error)
+//     }
+// })
+
 blogsRouter.post('/', async (request, response) => {
-    const blog = new Blog(request.body)
+    const body = request.body;
+
+    // Retrieve the user from the database using the ID provided in the request body
+    const user = await User.findById(body.user); // <- Change this line
+
+    if (!user) {
+        return response.status(401).json({ error: 'Invalid user' });
+    }
+
+    const blog = new Blog({
+        ...body,
+        user: user._id, // This will now use the correct user ID from the database
+    });
 
     try {
-        const savedBlog = await blog.save()
-        response.status(201).json(savedBlog)
+        const savedBlog = await blog.save();
+
+        // Add the new blog's ID to the user's blogs array
+        user.blogs = user.blogs.concat(savedBlog._id);
+        await user.save();
+
+        response.status(201).json(savedBlog);
     } catch (error) {
-        console.log(error)
-        response.status(400).send(error)
+        console.log(error);
+        response.status(400).send(error);
     }
-})
+});
+
 
 blogsRouter.get('/:id', async (request, response, next) => {
     try {
