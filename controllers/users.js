@@ -34,4 +34,15 @@ usersRouter.post('/', async (request, response, next) => {
     }
 });
 
+usersRouter.get('/', async (request, response) => {
+    const users = await User
+        .find({}).populate({
+            path: 'blogs', // Assuming 'blogs' is the field in the User model referencing the Blog model
+            select: 'title author url likes' // Select the fields you want from the Blog model
+        });
+
+    response.json(users);
+});
+
+
 module.exports = usersRouter
