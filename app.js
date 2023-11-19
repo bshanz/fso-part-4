@@ -41,3 +41,5 @@ app.use(middleware.errorHandler)
 
 
 module.exports = app
+
+console.log("hello world")
