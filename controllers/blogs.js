@@ -1,10 +1,18 @@
 const blogsRouter = require('express').Router()
+const { get } = require('config')
 const { response } = require('../app')
 const Blog = require('../models/blog')
 const User = require('../models/user')
+const jwt = require('jsonwebtoken')
 
-// Next step: see ChatGPT and update this and the Blog model to include 
-// user information when a blog is created or displayed
+const getTokenFrom = request => {
+    const authorization = request.get('authorization')
+    if (authorization && authorization.toLowerCase().startsWith('bearer')) {
+        return authorization.substring(7) // 'Bearer ' has 7 characters
+    }
+    return null
+}
+
 
 blogsRouter.get('/', async (request, response) => {
     try {
@@ -16,23 +24,17 @@ blogsRouter.get('/', async (request, response) => {
 
 })
 
-// blogsRouter.post('/', async (request, response) => {
-//     const blog = new Blog(request.body)
-
-//     try {
-//         const savedBlog = await blog.save()
-//         response.status(201).json(savedBlog)
-//     } catch (error) {
-//         console.log(error)
-//         response.status(400).send(error)
-//     }
-// })
-
 blogsRouter.post('/', async (request, response) => {
     const body = request.body;
 
-    // Retrieve the user from the database using the ID provided in the request body
-    const user = await User.findById(body.user); // <- Change this line
+    // get the token from the request
+    const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
+    if (!decodedToken.id) {
+        return response.status(401).json({ error: 'token missing or invalid' });
+    }
+
+    // Retrieve the user based on the decoded token
+    const user = await User.findById(decodedToken.id);
 
     if (!user) {
         return response.status(401).json({ error: 'Invalid user' });
