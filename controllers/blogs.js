@@ -78,12 +78,29 @@ blogsRouter.delete('/:id', async (request, response) => {
     const id = request.params.id;  // Get id from request parameters
 
     try {
-        await Blog.findByIdAndRemove(id);  // Use mongoose's findByIdAndRemove function
-        response.status(204).end();  // If successful, respond with no content
+        const blog = await Blog.findById(id);
+        if (!blog) {
+            return response.status(404).send({ error: 'Blog not found' });
+        }
+
+        // Verify the token and get the user ID
+        const decodedToken = jwt.verify(request.token, process.env.SECRET);
+        if (!decodedToken.id) {
+            return response.status(401).json({ error: 'token missing or invalid' });
+        }
+
+        // Check if the user ID matches the blog's creator ID
+        if (blog.user.toString() !== decodedToken.id.toString()) {
+            return response.status(401).json({ error: 'only the creator can delete a blog' });
+        }
+
+        await Blog.findByIdAndRemove(id);
+        response.status(204).end();
     } catch (exception) {
         console.error(exception);
         response.status(500).send({ error: 'something went wrong...' });
     }
-})
+});
+
 
 module.exports = blogsRouter
