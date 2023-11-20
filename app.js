@@ -6,7 +6,8 @@ const blogsRouter = require('./controllers/blogs')
 const middleware = require('./utils/middleware')
 const logger = require('./utils/logger')
 const mongoose = require('mongoose')
-const usersRouter = require('./controllers/users'); // Assuming you have this file set up
+const usersRouter = require('./controllers/users');
+const loginRouter = require('./controllers/login');
 
 //const Blog = require('./models/blog') // import the Blog model
 
@@ -34,6 +35,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/blogs', blogsRouter)
 app.use('/api/users', usersRouter);
+app.use('/api/login', loginRouter);
 
 
 app.use(middleware.unknownEndpoint)
