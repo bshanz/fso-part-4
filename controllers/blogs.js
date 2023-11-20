@@ -1,10 +1,18 @@
 const blogsRouter = require('express').Router()
+const { get } = require('config')
 const { response } = require('../app')
 const Blog = require('../models/blog')
 const User = require('../models/user')
+const jwt = require('jsonwebtoken')
 
-// Next step: see ChatGPT and update this and the Blog model to include 
-// user information when a blog is created or displayed
+const getTokenFrom = request => {
+    const authorization = request.get('authorization')
+    if (authorization && authorization.toLowerCase().startsWith('bearer')) {
+        return authorization.substring(7) // 'Bearer ' has 7 characters
+    }
+    return null
+}
+
 
 blogsRouter.get('/', async (request, response) => {
     try {
@@ -16,46 +24,26 @@ blogsRouter.get('/', async (request, response) => {
 
 })
 
-// blogsRouter.post('/', async (request, response) => {
-//     const blog = new Blog(request.body)
-
-//     try {
-//         const savedBlog = await blog.save()
-//         response.status(201).json(savedBlog)
-//     } catch (error) {
-//         console.log(error)
-//         response.status(400).send(error)
-//     }
-// })
-
 blogsRouter.post('/', async (request, response) => {
     const body = request.body;
-
-    // Retrieve the user from the database using the ID provided in the request body
-    const user = await User.findById(body.user); // <- Change this line
-
-    if (!user) {
-        return response.status(401).json({ error: 'Invalid user' });
-    }
+    const user = request.user;  // User is already extracted by the middleware
 
     const blog = new Blog({
         ...body,
-        user: user._id, // This will now use the correct user ID from the database
+        user: user._id  // Use the user's ID directly from the request object
     });
 
     try {
         const savedBlog = await blog.save();
-
-        // Add the new blog's ID to the user's blogs array
-        user.blogs = user.blogs.concat(savedBlog._id);
+        user.blogs = user.blogs.concat(savedBlog._id);  // Add blog to user's blogs
         await user.save();
-
         response.status(201).json(savedBlog);
     } catch (error) {
-        console.log(error);
+        console.error(error);
         response.status(400).send(error);
     }
 });
+
 
 
 blogsRouter.get('/:id', async (request, response, next) => {
@@ -73,15 +61,28 @@ blogsRouter.get('/:id', async (request, response, next) => {
 })
 
 blogsRouter.delete('/:id', async (request, response) => {
-    const id = request.params.id;  // Get id from request parameters
+    const id = request.params.id;
+    const user = request.user;  // User is already extracted by the middleware
 
     try {
-        await Blog.findByIdAndRemove(id);  // Use mongoose's findByIdAndRemove function
-        response.status(204).end();  // If successful, respond with no content
-    } catch (exception) {
-        console.error(exception);
+        const blog = await Blog.findById(id);
+        if (!blog) {
+            return response.status(404).json({ error: 'Blog not found' });
+        }
+
+        // Check if the blog belongs to the user
+        if (blog.user.toString() !== user._id.toString()) {
+            return response.status(401).json({ error: 'only the creator can delete this blog' });
+        }
+
+        await Blog.findByIdAndRemove(id);
+        response.status(204).end();
+    } catch (error) {
+        console.error(error);
         response.status(500).send({ error: 'something went wrong...' });
     }
-})
+});
+
+
 
 module.exports = blogsRouter
