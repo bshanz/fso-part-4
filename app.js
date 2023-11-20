@@ -33,13 +33,17 @@ app.get('/', (req, res) => {
   res.send("Hello World");
 });
 
-app.use('/api/blogs', blogsRouter)
+// Register the tokenExtractor middleware before your route handlers
+app.use(middleware.tokenExtractor);
+
+
+// Router handlers
+app.use('/api/blogs', blogsRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/login', loginRouter);
 
 
-app.use(middleware.unknownEndpoint)
-app.use(middleware.errorHandler)
-
+app.use(middleware.unknownEndpoint);
+app.use(middleware.errorHandler);
 
 module.exports = app
