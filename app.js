@@ -6,12 +6,10 @@ const blogsRouter = require('./controllers/blogs')
 const middleware = require('./utils/middleware')
 const logger = require('./utils/logger')
 const mongoose = require('mongoose')
-const usersRouter = require('./controllers/users');
-const loginRouter = require('./controllers/login');
+const usersRouter = require('./controllers/users')
+const loginRouter = require('./controllers/login')
 
-//const Blog = require('./models/blog') // import the Blog model
-
-mongoose.set('strictQuery', false)
+// mongoose.set('strictQuery', false)
 
 logger.info('connecting to', config.MONGODB_URI)
 
@@ -28,22 +26,20 @@ app.use(cors())
 app.use(express.json())
 app.use(middleware.requestLogger)
 
+// Register the tokenExtractor middleware globally
+app.use(middleware.tokenExtractor)
+
 // Add root route here
 app.get('/', (req, res) => {
-  res.send("Hello World");
-});
+  res.send("Hello World")
+})
 
-// Register the tokenExtractor middleware before your route handlers
-app.use(middleware.tokenExtractor);
+// Use the userExtractor middleware only for /api/blogs routes
+app.use('/api/blogs', middleware.userExtractor, blogsRouter)
+app.use('/api/users', usersRouter)
+app.use('/api/login', loginRouter)
 
-
-// Router handlers
-app.use('/api/blogs', blogsRouter);
-app.use('/api/users', usersRouter);
-app.use('/api/login', loginRouter);
-
-
-app.use(middleware.unknownEndpoint);
-app.use(middleware.errorHandler);
+app.use(middleware.unknownEndpoint)
+app.use(middleware.errorHandler)
 
 module.exports = app
